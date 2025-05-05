@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "express": "^5.1.0",
+    "pg": "^8.15.6",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.7"
+  }
+}
