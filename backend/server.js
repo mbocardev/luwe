@@ -1,20 +1,19 @@
-const express = require('express');
-const app = express();
-const userRoutes = require('./routes/userRoutes');
-const propertyRoutes = require('./routes/propertyRoutes');
-const rentalRoutes = require('./routes/rentalRoutes');
-const messageRoutes = require('./routes/messageRoutes');
-const paymentRoutes = require('./routes/paymentRoutes');
-const issueRoutes = require('./routes/issueRoutes');
+const app = require('./app');
+const sequelize = require('./config/db');
+require('dotenv').config();
 
-app.use(express.json());
+const PORT = process.env.PORT || 3000;
 
-// Routes
-app.use('/api/users', userRoutes);
-app.use('/api/properties', propertyRoutes);
-app.use('/api/rentals', rentalRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/issues', issueRoutes);
-
-module.exports = app;
+sequelize.authenticate()
+    .then(() => {
+        console.log('Database connected successfully');
+        return sequelize.sync();
+    })
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log(`Server running on http://localhost:${PORT}`);
+        });
+    })
+    .catch(error => {
+        console.error('Unable to connect to the database:', error);
+    });

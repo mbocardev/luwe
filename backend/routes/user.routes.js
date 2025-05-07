@@ -1,20 +1,14 @@
 const express = require('express');
+const { verifyToken, isAdmin } = require('../middlewares/auth.middleware');
+const userController = require('../controllers/user.controller');
+
 const router = express.Router();
-const userController = require('../controllers/userController');
 
-// Créer un utilisateur
-router.post('/', userController.createUser);
+router.use(verifyToken);
 
-// Récupérer tous les utilisateurs
-router.get('/', userController.getAllUsers);
-
-// Récupérer un utilisateur par ID
+router.get('/', isAdmin, userController.getAllUsers);
 router.get('/:id', userController.getUserById);
-
-// Mettre à jour un utilisateur
 router.put('/:id', userController.updateUser);
-
-// Supprimer un utilisateur
-router.delete('/:id', userController.deleteUser);
+router.delete('/:id', isAdmin, userController.deleteUser);
 
 module.exports = router;

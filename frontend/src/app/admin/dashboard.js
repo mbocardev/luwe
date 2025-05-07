@@ -1,38 +1,82 @@
-'use client';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Card, CardContent, Button, Input, Table, TableRow, TableCell, Modal } from '@/components/ui';
 
-import Link from 'next/link';
+export default function AdminUserDashboard() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [editUser, setEditUser] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
-export default function AdminDashboard() {
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('/api/users');
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = (e) => {
+    setSearch(e.target.value);
+  };
+
+  const handleEdit = (user) => {
+    setEditUser(user);
+    setShowModal(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+      try {
+        await axios.delete(`/api/users/${id}`);
+        fetchUsers();
+      } catch (error) {
+        console.error('Failed to delete user:', error);
+      }
+    }
+  };
+
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(search.toLowerCase()) ||
+    user.email.toLowerCase().includes(search.toLowerCase()) ||
+    user.role.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <main className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Tableau de bord Administrateur</h1>
+    <div className="p-4">
+      <Card>
+        <CardContent>
+          <h2 className="text-xl font-bold mb-4">Admin - Gestion des Utilisateurs</h2>
+          <Input placeholder="Rechercher..." value={search} onChange={handleSearch} className="mb-4" />
+          <Table>
+            <tbody>
+              {loading ? <p>Chargement...</p> : filteredUsers.map(user => (
+                <TableRow key={user.id}>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.role}</TableCell>
+                  <TableCell>
+                    <Button onClick={() => handleEdit(user)}>Editer</Button>
+                    <Button className="ml-2" variant="destructive" onClick={() => handleDelete(user.id)}>Supprimer</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </tbody>
+          </Table>
+        </CardContent>
+      </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Link href="/admin/users/list" className="block bg-white p-4 shadow rounded hover:bg-gray-50">
-          <h2 className="text-xl font-semibold">Gestion des utilisateurs</h2>
-          <p className="text-gray-600">Voir, vérifier ou bannir les comptes</p>
-        </Link>
-
-        <Link href="/admin/properties/list" className="block bg-white p-4 shadow rounded hover:bg-gray-50">
-          <h2 className="text-xl font-semibold">Biens immobiliers</h2>
-          <p className="text-gray-600">Consulter ou modérer les annonces</p>
-        </Link>
-
-        <Link href="/admin/rentals/list" className="block bg-white p-4 shadow rounded hover:bg-gray-50">
-          <h2 className="text-xl font-semibold">Locations</h2>
-          <p className="text-gray-600">Suivre les locations en cours</p>
-        </Link>
-
-        <Link href="/admin/issues/list" className="block bg-white p-4 shadow rounded hover:bg-gray-50">
-          <h2 className="text-xl font-semibold">Signalements</h2>
-          <p className="text-gray-600">Gérer les problèmes signalés</p>
-        </Link>
-
-        <Link href="/admin/payments" className="block bg-white p-4 shadow rounded hover:bg-gray-50">
-          <h2 className="text-xl font-semibold">Paiements</h2>
-          <p className="text-gray-600">Suivre les transactions et paiements</p>
-        </Link>
-      </div>
-    </main>
+      {/* Modal d'édition */}
+      {showModal && <Modal onClose={() => setShowModal(false)}>Édition de l'utilisateur {editUser?.name}</Modal>}
+    </div>
   );
 }
