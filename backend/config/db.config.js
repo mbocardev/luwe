@@ -1,27 +1,28 @@
 require('dotenv').config();
-const { Sequelize } = require('sequelize');
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: process.env.DB_HOST || 'localhost',
-    dialect: 'postgres',
-    port: process.env.DB_PORT || 5432,
-    logging: false,
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    }
+module.exports = {
+  development: {
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    dialect: "postgres"
+  },
+  test: {
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME + "_test",
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    dialect: "postgres"
+  },
+  production: {
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    dialect: "postgres"
   }
-);
-
-// Test de connexion
-sequelize.authenticate()
-  .then(() => console.log('Connexion à la base de données PostgreSQL réussie.'))
-  .catch(err => console.error('Impossible de se connecter à la base de données PostgreSQL:', err));
-
-module.exports = sequelize;
+};
