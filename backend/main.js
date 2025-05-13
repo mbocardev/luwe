@@ -14,7 +14,7 @@ const con = new Client({
 
 con.connect().then(() => console.log("Connected"));
 
-// CREATE
+// CREATE 
 app.post('/postData', (req, res) => {
     const { id, name, email, password, role, phone, verified, type } = req.body;
     const insert_query = 'INSERT INTO "user" (id, name, email, password, role, phone, verified, type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)';
